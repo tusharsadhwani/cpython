@@ -2190,6 +2190,19 @@ dummy_func(
             unused/8 +
             _LOAD_ATTR;
 
+        inst(_SAFE_LOAD_ATTR, (owner -- attr)) {
+            PyObject *name = GETITEM(FRAME_CO_NAMES, (oparg + 2) >> 1);
+            PyObject *attr_o;
+            PyObject_GetOptionalAttr(PyStackRef_AsPyObjectBorrow(owner), name, &attr_o);
+            DECREF_INPUTS();
+            // Instead of erroring on attr_o being NULL, set it to Python's `None`
+            if(attr_o == NULL) {
+                attr = PyStackRef_FromPyObjectImmortal(Py_None);
+            } else {
+                attr = PyStackRef_FromPyObjectSteal(attr_o);
+            }
+        }
+
         op(_GUARD_TYPE_VERSION, (type_version/2, owner -- owner)) {
             PyTypeObject *tp = Py_TYPE(PyStackRef_AsPyObjectBorrow(owner));
             assert(type_version != 0);

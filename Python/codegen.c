@@ -5000,6 +5000,12 @@ codegen_visit_expr(compiler *c, expr_ty e)
             break;
         }
         break;
+    case SafeAttribute_kind:
+        VISIT(c, expr, e->v.SafeAttribute.value);
+        loc = LOC(e);
+        loc = update_start_location_to_match_attr(c, loc, e);
+        ADDOP_NAME(c, loc, _SAFE_LOAD_ATTR, e->v.SafeAttribute.attr, names);
+        break;
     case Subscript_kind:
         return codegen_subscript(c, e);
     case Starred_kind:
